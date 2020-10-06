@@ -5,12 +5,15 @@ export default class Dashboard extends Component {
   state = {
     restaurantData: [],
     sortedAlphabetically: false,
-    searchInput: "",
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData = () => {
     const url = "https://code-challenge.spectrumtoolbox.com/api/restaurants";
-    await fetch(url, {
+    fetch(url, {
       headers: {
         Authorization: "Api-Key q3MNxtfep8Gt ",
       },
@@ -18,10 +21,25 @@ export default class Dashboard extends Component {
       .then((res) => res.json())
       .then((result) => {
         this.setState({
-          restaurantData: result.slice(0, 10),
+          restaurantData: result.slice(0, 20),
         });
       });
-  }
+  };
+
+  handleSearch = (e) => {
+    console.log(e.target.value);
+    if (e.target.value === "") {
+      this.fetchData();
+    }
+    let filteredArray = this.state.restaurantData.filter((o) =>
+      Object.keys(o).some((k) =>
+        o[k].toLowerCase().includes(e.target.value.toLowerCase())
+      )
+    );
+    this.setState({
+      restaurantData: filteredArray,
+    });
+  };
 
   sortAlphabetically = () => {
     let sortedData = this.state.restaurantData;
@@ -43,8 +61,19 @@ export default class Dashboard extends Component {
   render() {
     return (
       <div className="container">
-        <input className="input-wrapper" placeholder="search"></input>
+        <input
+          className="input-wrapper"
+          placeholder="search"
+          onChange={this.handleSearch}
+        ></input>
         <button onClick={this.sortAlphabetically}>Sort Alphabetically</button>
+        <label for="cars">Choose a car:</label>
+        <select name="cars" id="cars">
+          <option value="volvo">Volvo</option>
+          <option value="saab">Saab</option>
+          <option value="mercedes">Mercedes</option>
+          <option value="audi">Audi</option>
+        </select>
         <ResultsTable restaurantData={this.state.restaurantData} />
       </div>
     );
